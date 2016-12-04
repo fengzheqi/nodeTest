@@ -7,6 +7,10 @@ var express = require('express');
 var bodyParser = require('body-parser');
 
 var random = require('./lib/random');
+
+var mail = require('./lib/mail');
+var cache = require('./lib/cache');
+
 var app = express();
 var prefix = '/api';
 var tables ={};
@@ -57,6 +61,19 @@ function createModel(name) {
       res.send(tables[name]);
     }
   );
+
+  app.post('/api/blogs', function (req, res, next) {
+    setTimeout(cache.clear, 30*60*1000);
+    next();
+  });
+  app.post('/api/blogs', function (req, res, next) {
+    mail.sendMail({
+      from: req.query.from || 'someone <someone@gmail.com>',
+      to: 'Blog Admin <admin@blog.com>',
+      subject: 'someone is posting a blog',
+      text: 'some is posting a blog'
+    }, next);
+  });
   app.post(
     prefix + '/' + name + 's',
     function (req, res) {

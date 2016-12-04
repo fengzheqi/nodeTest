@@ -7,6 +7,10 @@ var app = require('../../app');
 var assert = require('assert');
 var request = require('supertest');
 
+var sinon = require('sinon');
+var mail = require('../../lib/mail');
+var cache = require('../../lib/cache');
+
 describe('http.blog', function () {
   var post = {
     title: 'title',
@@ -26,12 +30,33 @@ describe('http.blog', function () {
 
   describe('POST /blogs/', function () {
     it('should post a blog', function (next) {
+      // 创建mail.sendMail的stub对象
+      var send = sinon.stub(mail, 'sendMail');
+      send.onFirstCall().callsArg(1);
+
+      var clock = sinon.useFakeTimers();
+      var clear = sinon.stub(cache, 'clear');
+
+      // 原有的http测试
       request(app).post('/api/blogs')
         .send(post)
         .expect(201, function (err, res) {
+          clock.tick(30*60*1000);
+          assert.ok(clear.calledOnce);
           next(err);
+
           post.id = res.body.id;
           assert.deepEqual(post, res.body);
+
+          // 进行参数的确认
+          assert.deepEqual({
+            from: 'someone <someone@gmail.com',
+            to: 'Blog Admin <admin@blog.com>',
+            subject: 'someone is posting a blog',
+            text: 'some is posting a blog'
+          }, send.args[0][0]);
+          // 销毁stub
+          send.restore();
         })
     });
   });
