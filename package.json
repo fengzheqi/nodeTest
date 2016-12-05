@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test istanbul cover node_modules/mocha/bin/_mocha test/**/*.js"
+    "test": "cross-env NODE_ENV=test istanbul cover node_modules/mocha/bin/_mocha test/**/*.js",
+    "test-func": "cross-env NODE_ENV=test TEST_TYPE=functional istanbul cover node_modules/mocha/bin/_mocha test/**/*.js"
   },
   "author": "",
   "license": "ISC",

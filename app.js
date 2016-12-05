@@ -24,7 +24,11 @@ if (process.env.NODE_ENV !== 'test') {
   app.listen(port);
   console.log('start from http://localhost:' + port);
 } else {
-  module.exports = app;
+  if (process.env.TEST_TYPE === 'functional') {
+    module.exports = 'https://staging-server';
+  } else {
+    module.exports = app;
+  }
 }
 
 function createModel(name) {
